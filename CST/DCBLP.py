@@ -6,7 +6,7 @@ class Ako:
         s.enter(t, 1, self.generate, (s, t, CLK))
         self.Q = not self.Q
         CLK.put(self.Q)
-
+# uděláme změnu haha
 
 class RS:
     """
