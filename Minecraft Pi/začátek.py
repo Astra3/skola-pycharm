@@ -61,3 +61,4 @@ for znak in text:
                 a = 0
             pricti(kolik_y=-1)  # o blok dolů v písmenu
         pricti(1)  # další písmeno
+# lol
