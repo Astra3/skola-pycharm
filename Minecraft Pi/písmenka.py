@@ -26,7 +26,7 @@ for znak in text:
     if znak == " ":
         pricti(3)
     else:
-        pozice_znaku = (ord(znak) - 97) * 25
+        pozice_znaku = (ord(znak) - 97) * 25  # vypočte pozici znaku v mapě
         for cislo in abeceda[pozice_znaku:pozice_znaku + 25]:  # cislo = definice čísla nalezená v mapě, string
             if bool(int(cislo)):
                 mc.setBlock(pos, 1)
