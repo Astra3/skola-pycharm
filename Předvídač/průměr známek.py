@@ -6,7 +6,8 @@ def zaokrouhli(vstup: np.ndarray) -> str:
     return np.format_float_positional(vstup, precision=4)
 
 
-a = input("Enter pro clipboard, 'a' pro načtení ze známky.npy: ")
+a = input("Nic pro čtení z clipboard, 'a' pro načtení ze známky.npy, 'w' v kombinaci s předchozími pro uložení "
+          "výsledného array: ")
 if a in "w":
     data = pyperclip.paste()
     data = data.split("\n")
@@ -29,7 +30,8 @@ if a in "w":
     znamky = np.array([znamky, vahy])
 else:
     znamky = np.load("známky.npy")
-    print("Známky načteny ze souboru")
+    print(f"Známky načteny ze souboru\n"
+          f"{znamky}")
 
 
 a2 = []
@@ -52,7 +54,8 @@ try:
     if a in "w":
         np.save("známky.npy", znamky)
         print("Soubor uložen")
-except ValueError:
+except ValueError as exception:
+    print(f"Chyba: {exception}")
     print(f"Stala se chyba při zadávání známek, array uložen do souboru známky.npy")
     np.save("známky.npy", znamky)
 finally:
