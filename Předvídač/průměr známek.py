@@ -6,6 +6,10 @@ def zaokrouhli(vstup: np.ndarray) -> str:
     return np.format_float_positional(vstup, precision=4)
 
 
+def vazeny_prumer(prumer: np.ndarray) -> str:
+    return zaokrouhli(np.average(prumer[0], weights=prumer[1]))
+
+
 a = input("Nic pro čtení z clipboard, 'a' pro načtení ze známky.npy, 'w' v kombinaci s předchozími pro uložení "
           "výsledného array: ")
 if a in "w":
@@ -32,26 +36,27 @@ else:
     znamky = np.load("známky.npy")
     print(f"Známky načteny ze souboru\n"
           f"{znamky}")
-
+print(f"Současný průměr: {vazeny_prumer(znamky)}")
 
 a2 = []
 try:
     while True:
-        a = input("Zadejte známku a za čárkou s mezerou váhu (1, 10), enter pro konec: ")
-        if a == "":
+        a3 = input("Zadejte známku a za čárkou s mezerou váhu (1, 10), enter pro konec: ")
+        if a3 == "":
             break
         else:
-            a = a.split(", ")
-        if len(a) != 2:  # checkuje zda vznikly jen dvě pole
+            a3 = a3.split(", ")
+        if len(a3) != 2:  # checkuje zda vznikly jen dvě pole
             raise ValueError("Chybně zadaná známka")
-        for i in a:
+        for i in a3:
             if i[-1] == "-":  # kontroluje za je známka minus nebo ne
                 a2.append(int(i[:-1]) + .5)
             else:
                 a2.append(int(i))
         znamky = np.append(znamky, np.array([[a2[0]], [a2[1]]]), axis=1)
+        print(f"Současný průměr: {vazeny_prumer(znamky)}")
         a2 = []
-    if a in "w":
+    if "w" in a:
         np.save("známky.npy", znamky)
         print("Soubor uložen")
 except ValueError as exception:
@@ -63,4 +68,4 @@ finally:
           f"{znamky}\n"
           f"Medián: {zaokrouhli(np.median(znamky[0]))}\n"
           f"Aritmetický průměr: {zaokrouhli(np.mean(znamky[0]))}\n"
-          f"Výsledný průměr: {zaokrouhli(np.average(znamky[0], weights=znamky[1]))}")
+          f"Výsledný průměr: {vazeny_prumer(znamky)}")
