@@ -1,3 +1,5 @@
-gpiozero
-pyperclip
-mcpi
+gpiozero~=1.5.1
+pyperclip~=1.8.0
+mcpi~=1.2.0
+
+numpy~=1.17.4
