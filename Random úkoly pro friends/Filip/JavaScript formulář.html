@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Propojení JS s HTML</title>
+    <script>
+        function formular() {
+            let form = document.getElementById('formula')
+            let prvniJmeno = form.elements[0]
+            let prijmeni = form.elements[1]
+            let vek = form.elements[2]
+            let mesto = form.elements[3]
+            document.write(`Jmenuješ se ${prvniJmeno.value} ${prijmeni.value}, je ti ${vek.value} let a tvé rodné město je ${mesto.value}.`)
+        }
+    </script>
+</head>
+<body>
+    <form id="formula">
+        <label>
+            Křestní jméno<input type="text" name="prvni_jmeno">
+        </label>
+        <label>
+            Příjmení<input type="text" name="prijmeni">
+        </label>
+        <label>
+            Věk<input type="number" name="vek">
+        </label>
+        <label>
+            Město<input type="text" name="mesto">
+        </label>
+        <input type="submit" value="Odeslat" onclick="formular()">
+    </form>
+</body>
+</html>
