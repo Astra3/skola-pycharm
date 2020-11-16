@@ -19,7 +19,7 @@ class Zamestnanec:
         except FileNotFoundError:
             pass
         finally:
-            self._file = open(f"{filepath}{self.jmeno} {self.prijmeni}.txt", "a")
+            self._file = open(f"{filepath}{self.jmeno} {self.prijmeni}.txt", "w")
         self._den = []
 
     def prichod(self) -> str:
@@ -54,13 +54,20 @@ class Zamestnanec:
         return text
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for i2 in self._dochazka:
-            for i3 in i2:
-                self._file.write(f"{i3}\n")
-        self._file.close()
+        self.close()
 
     def __enter__(self):
         return self
+
+    def close(self):
+        for i2 in self._dochazka:
+            for i3 in i2:
+                try:
+                    if i3[-1] == "\n":
+                        self._file.write(i3)
+                except TypeError:
+                    self._file.write(f"{i3}\n")
+        self._file.close()
 
     @property
     def jmeno(self) -> str:
