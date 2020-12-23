@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/Minecraft Pi/Spolužáci/Adam Žluva" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/MSA/Raspberry Pi/Začátky/Parita" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Projekty/Včelí váha" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/Minecraft Pi/Spolužáci" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
