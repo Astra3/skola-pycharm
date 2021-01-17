@@ -1,9 +1,12 @@
 #!/usr/bin/python3 -u
-from Bluetooth_třída import BluetoothComm
-from time import sleep
+import logging
 import subprocess
-from gpiozero import PWMLED
+import sys
+from time import sleep
 from typing import List, Union
+
+from Bluetooth_třída import BluetoothComm
+from Měření import Vaha
 
 
 def bytes_find(inp: bytes, find: Union[bytes, List[bytes]]) -> float:
@@ -15,27 +18,28 @@ def bytes_find(inp: bytes, find: Union[bytes, List[bytes]]) -> float:
     return float(inp[index:])
 
 
-led = PWMLED(4)
-with BluetoothComm() as comm:
-    while True:
-        # comm.send_comm("ahoj jak terminal jede?\n")
-        comm.send_comm("mehehe")
-        read = comm.read_comm()
-        print(f"Input: {read}")
-        if read == b"turn off\r\n":
-            subprocess.run(["poweroff"])
-            break
-        elif read == b'q\r\n':
-            print("program ukončen")
-            break
-        elif b'led' in read:
-            if b'on' in read:
-                led.on()
-            elif b'toggle' in read:
-                led.toggle()
-            elif b'off' in read:
-                led.off()
-            elif b'value' in read:
-                led.value = bytes_find(read, [b'.', b'1', b'0'])
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
 
-        sleep(.1)
+# Zajistí aby výstup logu šel do stdout a ne do stderr
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
+
+with BluetoothComm() as comm, Vaha() as vaha:
+    while True:
+        comm.send(f"{vaha.read}\n")
+        read = comm.read
+        if b'raw' in read:
+            comm.send(f"raw hodnota: {vaha.raw}")
+        elif b'power off' in read or b'vypnout' in read:
+            subprocess.run(["poweroff"])
+        elif b'kalibrace' in read:
+            comm.send(f"Kalibrační faktor: {vaha.calibration}")
+        elif b"init read" in read:
+            comm.send(f"Init reading: {vaha.init_reading}")
+        elif b'q' in read:
+            break
+        sleep(.2)
