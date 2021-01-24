@@ -35,6 +35,8 @@ with BluetoothComm() as comm, Vaha() as vaha:
         if b'raw' in read:
             comm.send(f"raw hodnota: {vaha.raw}")
         elif b'power off' in read or b'vypnout' in read:
+            comm.send("Vypínám systém...")
+            logging.info("Vypínám systém...")
             subprocess.run(["poweroff"])
         elif b'kalibrace' in read:
             comm.send(f"Kalibrační faktor: {vaha.calibration}")
