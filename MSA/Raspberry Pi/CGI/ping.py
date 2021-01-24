@@ -2,16 +2,17 @@
 
 import cgi
 import cgitb
-from threading import Thread
 from subprocess import Popen, PIPE
 
 
 def field_check():
     if "ip" not in args:
-        print("Je potřeba zadat proměnnou 'ip' jako string přes GET")
+        print("Je potřeba zadat proměnnou 'ip' jako string přes GET\n"
+              "Další možné proměnné:\n"
+              "c - počet pingů (výchozí 4)\n"
+              "i - interval mezi pingy (výchozí 1s)\n".replace("\n", "<br>"))
         exit(0)
     return ping(args.getvalue("ip"))
-    # return ping("localhost")
 
 
 def ping(ip: str):
@@ -19,7 +20,11 @@ def ping(ip: str):
         count = args.getvalue("c")
     else:
         count = 4
-    ping_proc = Popen(["ping", "-c", str(count), str(ip)], stdout=PIPE, stderr=PIPE)
+    if "i" in args:
+        interval = args.getvalue("i")
+    else:
+        interval = 1
+    ping_proc = Popen(["ping", "-c", str(count), "-i", str(interval), str(ip)], stdout=PIPE, stderr=PIPE)
     return ping_proc
 
 
