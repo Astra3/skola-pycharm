@@ -1,0 +1,6 @@
+{% extends "template.html" %}
+{% block content %}
+<p>{{output|safe}}</p>
+<a href="{{url_for('main', address=form.address.data, i=form.i.data, c=form.c.data)}}">Jít zpátky</a>
+<br><b style='color: {{text.color}}'>{{text.text}}</b>
+{% endblock %}

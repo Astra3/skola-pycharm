@@ -1,0 +1,26 @@
+{% extends "template.html" %}
+{% block content %}
+<form action="" method="get">
+
+    {{form.address.label}}
+    {{form.address}}
+
+    {{form.c.label}}
+    {{form.c}}
+
+
+    {{form.i.label}}
+    {{form.i}}
+
+    {{form.sub}}
+</form>
+<p>
+    Ruční GET parametry:
+    <ul>
+    <li>address - adresa pingu</li>
+    <li>c - počet pingů</li>
+    <li>i - interval</li>
+    <li>sub - submit tlačítko, jakákoliv hodnota aktivuje ping</li>
+</ul>
+</p>
+{% endblock %}
