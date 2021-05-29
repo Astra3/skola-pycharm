@@ -31,7 +31,7 @@ class BluetoothComm:
         if read:
             self._wait = False
             # self._condition = Condition()
-            self._thread = Thread(target=self._read_comm)
+            self._thread = Thread(target=self._read_comm, daemon=True)
             self._thread.start()
 
     def _read_comm(self):
@@ -82,7 +82,6 @@ class BluetoothComm:
         try:
             self.client_sock.close()
             self._server_sock.close()
-            signal.pthread_kill(self._thread.ident, 2)
         finally:
             logging.info("BluetoothComm ukončen")
 
