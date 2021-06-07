@@ -55,26 +55,34 @@ else:
     znamky = np.load("známky.npy")
     print(f"Známky načteny ze souboru\n"
           f"{znamky}")
-print(f"Současný průměr: {vazeny_prumer(znamky)}")
-
 a2 = []
 try:
+    print("Tipy a triky:\n"
+          "'d' pro smazání poslední známky\n"
+          "'z' pro zobrazení současných známek")
+    print(f"Současný průměr: {vazeny_prumer(znamky)}")
+
     while True:
         a3 = input("Zadejte známku a za mezeru váhu (1 10), enter pro konec: ")
         if a3 == "":
             break
+        elif a3 == "d":
+            znamky = np.delete(znamky, -1, 1)
+            print("Známka smazána")
+        elif a3 == "z":
+            print(znamky)
         else:
             a3 = a3.split(" ")
-        if len(a3) != 2:  # checkuje zda vznikly jen dvě pole
-            raise ValueError("Chybně zadaná známka")
-        for i in a3:
-            if i[-1] == "-":  # kontroluje za je známka minus nebo ne
-                a2.append(int(i[:-1]) + .5)
-            else:
-                a2.append(int(i))
-        znamky = np.append(znamky, np.array([[a2[0]], [a2[1]]]), axis=1)
+            if len(a3) != 2:  # checkuje zda vznikly jen dvě pole
+                raise ValueError("Chybně zadaná známka")
+            for i in a3:
+                if i[-1] == "-":  # kontroluje za je známka minus nebo ne
+                    a2.append(int(i[:-1]) + .5)
+                else:
+                    a2.append(int(i))
+            znamky = np.append(znamky, np.array([[a2[0]], [a2[1]]]), axis=1)
+            a2 = []
         print(f"Současný průměr: {vazeny_prumer(znamky)}")
-        a2 = []
     if "w" in a:
         np.save("známky.npy", znamky)
         print("Soubor uložen")
