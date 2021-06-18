@@ -1,9 +1,17 @@
-from gpiozero import LED, Button
+from gpiozero import PWMLED, Button
+from time import sleep
 
-led: LED = LED(21)
-tlacitko: Button = Button(20)
-while True:
-    tlacitko.wait_for_active()
-    led.on()
-    tlacitko.wait_for_inactive()
+led = PWMLED(20)
+btn = Button(21)
+
+i = 0
+
+try:
+    while True:
+        btn.wait_for_active()
+        led.value = i
+        i += .01
+        i %= .25
+        sleep(.05)
+finally:
     led.off()

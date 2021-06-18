@@ -12,6 +12,7 @@
     <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Různé testování" />
+    <orderEntry type="module" module-name="GPIO projekty" />
   </component>
   <component name="PackageRequirementsSettings">
     <option name="versionSpecifier" value="Don't specify version" />
