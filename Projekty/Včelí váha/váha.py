@@ -28,20 +28,70 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s - %(me
 handler.setFormatter(formatter)
 root.addHandler(handler)
 
-with BluetoothComm() as comm, Vaha() as vaha:
+try:
+    with open("calibration.txt", "r") as file:
+        kalibrace = float(file.readline())
+except (ValueError, FileNotFoundError):
+    kalibrace = 1
+
+with BluetoothComm() as comm, Vaha(calibration_factor=kalibrace) as vaha:
+    if vaha.calibration == 1:
+        comm.send("Čtení kalibrace ze souboru bylo neúspěšné.")
+    comm.send("Zadejte help pro nápovědu.")
     while True:
-        comm.send(f"{vaha.read}\n")
+        comm.send(f"{vaha.read}")
         read = comm.read
         if b'raw' in read:
             comm.send(f"raw hodnota: {vaha.raw}")
+        elif b'help' in read:
+            comm.send("Nápověda k programu:\n"
+                      "raw - zobrazí hodnotu tak, jak je hlášená, bez přepočtů\n"
+                      "power off | vypnout - vypne Raspberry\n"
+                      "calibration - vypíše kalibrační faktor váhy\n"
+                      "init read - vypíše init_reading váhy\n"
+                      "kalibrace - spustí kalibraci váhy\n"
+                      "q - vypne program")
         elif b'power off' in read or b'vypnout' in read:
             comm.send("Vypínám systém...")
             logging.info("Vypínám systém...")
             subprocess.run(["poweroff"])
-        elif b'kalibrace' in read:
+            exit()
+        elif b'calibration' in read:
             comm.send(f"Kalibrační faktor: {vaha.calibration}")
         elif b"init read" in read:
             comm.send(f"Init reading: {vaha.init_reading}")
-        elif b'q' in read:
+        elif b"kalibrace" in read:
+            comm.send("Připojte se znovu k váze...")
             break
+        elif b'q' in read:
+            exit()
         sleep(.2)
+
+# tahle část kódu se spustí jen pokud se zadá to terminálu "calibrate"
+with BluetoothComm(False) as comm, open("calibration.txt", "w") as file:
+    comm.send("Zadejte 'enter', pokud si přejete zadat pouze kalibrační hodnotu - cokoliv jiného pro kalibraci")
+    if comm.wait_for_input() == b'enter':
+        comm.send("Zadejte kalibrační hodnotu")
+        try:
+            scale = float(comm.wait_for_input())
+        except ValueError:
+            comm.send("Nelze převést na číslo")
+            raise ValueError("Nelze převést na číslo")
+        comm.send(f"Kalibrační faktor: {scale}")
+    else:
+        comm.send("Ujistěte se, že váha je prázdná a pošlete jakoukoliv zprávu pro pokračování")
+        comm.wait_for_input()
+        with Vaha() as vaha:
+            comm.send(f"init reading: {vaha.init_reading}\n"
+                      f"Nyní položte na váhu nějaký objekt se známou hmotností a tu zadejte...")
+            try:
+                rel_weight = float(comm.wait_for_input())
+            except ValueError:
+                comm.send("Nelze převést na číselnou hodnotu!")
+                raise ValueError("Hmotnost nelze převést na číselnou hodnotu")
+
+            scale = rel_weight / (vaha.raw - vaha.init_reading)
+            comm.send(f"Kalibrační faktor: {scale}\n"
+                      f"{scale} = {rel_weight} / ({vaha.raw} - {vaha.init_reading})")
+    file.write(str(scale))
+    comm.send("Kalibrační faktor uložen, pro pokračovaní se znovu připojte.")

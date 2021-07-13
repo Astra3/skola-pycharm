@@ -53,12 +53,15 @@ class BluetoothComm:
         self._read = b''
         return a
 
-    def send(self, text: object):
+    def send(self, text: str, append: bool = True):
         """
         Pošle do Bluetooth terminálu text.
 
         :param text: text co se pošle do terminálu
+        :param append: přidá "\n" na konec textu, pokud tam není
         """
+        if append and not text.endswith("\n"):
+            text += "\n"
         self.client_sock.send(text)
 
     def wait_for_input(self) -> Union[bytes, None]:

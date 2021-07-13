@@ -5,7 +5,7 @@ import logging
 
 
 class Vaha:
-    def __init__(self, calibration_factor: int = 1, init_read: int = None, zaokrouhlit: int = 3):
+    def __init__(self, calibration_factor: int = 1, init_read: int = None, zaokrouhlit: int = 4):
         """
         Třída, která integruje modul HX711 s váhou
         Příklad::
@@ -20,7 +20,7 @@ class Vaha:
             0. Třeba pokud váha v nulovém stavu měří 0.08, tak tahle hodnota bude 0.08. **Pokud není hodnota zadaná, je
             třeba při zapnutí programu mít váhu prázdnou!**
         :param zaokrouhlit:
-            Určí hodnotu přes funkci round pro zaokrouhlení výstupu, na stejnou úroveň se zaokrouhlí i init_read.
+            Určí hodnotu přes funkci round pro zaokrouhlení výstupu.
         """
         self._zaokrouhli = zaokrouhlit
         self._vaha = HX711()
@@ -43,10 +43,12 @@ class Vaha:
         Současná hodnota váhy s korekcí kalibrace a nulové hodnoty.
         :return: hmotnost objektu
         """
-        vaha = (self._vaha.value - self.init_reading) * self.calibration
-        if vaha < 0:
-            vaha = 0.0
-        return self._round(vaha)
+        raw = self.raw
+        vaha_value = (raw - self.init_reading) * self.calibration
+        # print("raw" + str(self._vaha.raw_value))
+        if vaha_value < 0:
+            vaha_value = 0.0
+        return self._round(vaha_value)
 
     @property
     def raw(self):
@@ -54,7 +56,8 @@ class Vaha:
         Čistá hodnota váhy bez jakýchkoliv úprav.
         :return: hodnota získaná z HX711
         """
-        return self._vaha.value
+        hodnota = self._vaha.value
+        return hodnota
 
     def _round(self, zaokrouhlit: Union[int, float]) -> Union[int, float]:
         """
@@ -73,17 +76,24 @@ class Vaha:
 
 
 if __name__ == '__main__':
-    from time import sleep
-    print("Tento program získá kalibrační faktor váhy.")
-    vaha = Vaha()
-    init_reading = vaha.raw
-    sleep(.2)
-    input("Položte známou hmotnost na váhu a zmáčkněte ENTER.")
-    try:
-        rel_weight = float(input("Zadejte hmotnost předmětu: "))
-    except ValueError as err:
-        raise ValueError("Hmotnost může být jen float")
-    scale = rel_weight / (vaha.raw - init_reading)
-    print(f"Kalibrační faktor: {scale}\n"
-          f"{scale} = {rel_weight} / ({vaha.raw} - {init_reading})")
+    if input("Kalibrovat? y/n") == "y":
+        from time import sleep
+        input("Tento program získá kalibrační faktor váhy.\n"
+              "Ujistěte se, že na váze nic není a zmáčkněte enter...")
+        vaha = Vaha()
+        sleep(.2)
+        input("Položte známou hmotnost na váhu a zmáčkněte ENTER.")
+        try:
+            rel_weight = float(input("Zadejte hmotnost předmětu: "))
+        except ValueError as err:
+            raise ValueError("Hmotnost může být jen float")
+        scale = rel_weight / (vaha.raw - vaha.init_reading)
+        print(f"Kalibrační faktor: {scale}\n"
+              f"{scale} = {rel_weight} / ({vaha.raw} - {vaha.init_reading})")
+    else:
+        from time import sleep
+        spi = Vaha()
+        while True:
+            print("return" + str(spi.read))
+            sleep(.5)
 
