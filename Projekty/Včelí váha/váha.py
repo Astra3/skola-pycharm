@@ -4,9 +4,12 @@ import subprocess
 import sys
 from time import sleep
 from typing import List, Union
+from os import chdir
 
 from Bluetooth_třída import BluetoothComm
 from Měření import Vaha
+
+chdir("/home/pi/Včelí váha")
 
 
 def bytes_find(inp: bytes, find: Union[bytes, List[bytes]]) -> float:
@@ -42,7 +45,8 @@ with BluetoothComm() as comm, Vaha(calibration_factor=kalibrace) as vaha:
         comm.send(f"{vaha.read}")
         read = comm.read
         if b'raw' in read:
-            comm.send(f"raw hodnota: {vaha.raw}")
+            raw = vaha.raw
+            comm.send(f"raw hodnota: {raw}")
         elif b'help' in read:
             comm.send("Nápověda k programu:\n"
                       "raw - zobrazí hodnotu tak, jak je hlášená, bez přepočtů\n"
@@ -65,12 +69,12 @@ with BluetoothComm() as comm, Vaha(calibration_factor=kalibrace) as vaha:
             break
         elif b'q' in read:
             exit()
-        sleep(.2)
+        sleep(.8)
 
 # tahle část kódu se spustí jen pokud se zadá to terminálu "calibrate"
 with BluetoothComm(False) as comm, open("calibration.txt", "w") as file:
     comm.send("Zadejte 'enter', pokud si přejete zadat pouze kalibrační hodnotu - cokoliv jiného pro kalibraci")
-    if comm.wait_for_input() == b'enter':
+    if b'enter' in comm.wait_for_input():
         comm.send("Zadejte kalibrační hodnotu")
         try:
             scale = float(comm.wait_for_input())
@@ -90,8 +94,9 @@ with BluetoothComm(False) as comm, open("calibration.txt", "w") as file:
                 comm.send("Nelze převést na číselnou hodnotu!")
                 raise ValueError("Hmotnost nelze převést na číselnou hodnotu")
 
-            scale = rel_weight / (vaha.raw - vaha.init_reading)
+            raw = vaha.raw
+            scale = rel_weight / (raw - vaha.init_reading)
             comm.send(f"Kalibrační faktor: {scale}\n"
-                      f"{scale} = {rel_weight} / ({vaha.raw} - {vaha.init_reading})")
+                      f"{scale} = {rel_weight} / ({raw} - {vaha.init_reading})")
     file.write(str(scale))
     comm.send("Kalibrační faktor uložen, pro pokračovaní se znovu připojte.")

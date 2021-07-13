@@ -53,7 +53,8 @@ class Vaha:
     @property
     def raw(self):
         """
-        Čistá hodnota váhy bez jakýchkoliv úprav.
+        Čistá hodnota váhy bez jakýchkoliv úprav. Tahle hodnota se neustále mění, je doporučeno si ji uložit do vlastní
+        proměnné a poté používat, dokud nebude třeba její obnova.
         :return: hodnota získaná z HX711
         """
         hodnota = self._vaha.value
