@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../GPIO projekty/.idea/GPIO projekty.iml" filepath="$PROJECT_DIR$/../GPIO projekty/.idea/GPIO projekty.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Různé testování/.idea/Různé testování.iml" filepath="$PROJECT_DIR$/../Různé testování/.idea/Různé testování.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Včelí váha/.idea/Včelí váha.iml" filepath="$PROJECT_DIR$/../Včelí váha/.idea/Včelí váha.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Škola.iml" filepath="$PROJECT_DIR$/.idea/Škola.iml" />
     </modules>
   </component>
