@@ -7,7 +7,7 @@ from typing import List, Union
 from os import chdir
 
 from Bluetooth_třída import BluetoothComm
-from Měření import Vaha
+from hx711 import HX711
 
 chdir("/home/pi/Včelí váha")
 
@@ -37,22 +37,23 @@ try:
 except (ValueError, FileNotFoundError):
     kalibrace = 1
 
-with BluetoothComm() as comm, Vaha(calibration_factor=kalibrace) as vaha:
-    if vaha.calibration == 1:
-        comm.send("Čtení kalibrace ze souboru bylo neúspěšné.")
+
+with BluetoothComm() as comm, HX711(9, 11) as vaha:
+    comm.send("Inicializace programu...")
+    vaha.set_reading_format("MSB", "MSB")
+    vaha.set_reference_unit(kalibrace)
+    vaha.reset()
+    vaha.tare()
+    if vaha.get_reference_unit() == 1:
+        comm.send("Čtení kalibrace ze souboru bylo neúspěšné, hodnota nastavena na 1.")
     comm.send("Zadejte help pro nápovědu.")
     while True:
-        comm.send(f"{vaha.read}")
+        comm.send(f"{vaha.get_weight(5)}")
         read = comm.read
-        if b'raw' in read:
-            raw = vaha.raw
-            comm.send(f"raw hodnota: {raw}")
-        elif b'help' in read:
+        if b'help' in read:
             comm.send("Nápověda k programu:\n"
-                      "raw - zobrazí hodnotu tak, jak je hlášená, bez přepočtů\n"
                       "power off | vypnout - vypne Raspberry\n"
                       "calibration - vypíše kalibrační faktor váhy\n"
-                      "init read - vypíše init_reading váhy\n"
                       "kalibrace - spustí kalibraci váhy\n"
                       "q - vypne program")
         elif b'power off' in read or b'vypnout' in read:
@@ -61,15 +62,15 @@ with BluetoothComm() as comm, Vaha(calibration_factor=kalibrace) as vaha:
             subprocess.run(["poweroff"])
             exit()
         elif b'calibration' in read:
-            comm.send(f"Kalibrační faktor: {vaha.calibration}")
-        elif b"init read" in read:
-            comm.send(f"Init reading: {vaha.init_reading}")
+            comm.send(f"Kalibrační faktor: {vaha.get_reference_unit()}")
         elif b"kalibrace" in read:
             comm.send("Připojte se znovu k váze...")
             break
         elif b'q' in read:
             exit()
-        sleep(.8)
+        vaha.power_down()
+        vaha.power_up()
+        sleep(.4)
 
 # tahle část kódu se spustí jen pokud se zadá to terminálu "calibrate"
 with BluetoothComm(False) as comm, open("calibration.txt", "w") as file:
@@ -85,18 +86,21 @@ with BluetoothComm(False) as comm, open("calibration.txt", "w") as file:
     else:
         comm.send("Ujistěte se, že váha je prázdná a pošlete jakoukoliv zprávu pro pokračování")
         comm.wait_for_input()
-        with Vaha() as vaha:
-            comm.send(f"init reading: {vaha.init_reading}\n"
-                      f"Nyní položte na váhu nějaký objekt se známou hmotností a tu zadejte...")
+        with HX711(9, 11) as vaha:
+            vaha.set_reading_format("MSB", "MSB")
+            vaha.set_reference_unit(1)
+            vaha.reset()
+            vaha.tare()
+            comm.send(f"Nyní položte na váhu nějaký objekt se známou hmotností a tu zadejte...")
             try:
                 rel_weight = float(comm.wait_for_input())
             except ValueError:
                 comm.send("Nelze převést na číselnou hodnotu!")
                 raise ValueError("Hmotnost nelze převést na číselnou hodnotu")
 
-            raw = vaha.raw
-            scale = rel_weight / (raw - vaha.init_reading)
+            weight = vaha.get_weight(5)
+            scale = weight / rel_weight
             comm.send(f"Kalibrační faktor: {scale}\n"
-                      f"{scale} = {rel_weight} / ({raw} - {vaha.init_reading})")
+                      f"{scale} = {weight} / {rel_weight})")
     file.write(str(scale))
     comm.send("Kalibrační faktor uložen, pro pokračovaní se znovu připojte.")
