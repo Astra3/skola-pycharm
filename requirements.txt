@@ -6,3 +6,4 @@ numpy
 WTForms
 pandas
 SQLAlchemy
+click
