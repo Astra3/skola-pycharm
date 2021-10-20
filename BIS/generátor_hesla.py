@@ -18,13 +18,15 @@ spe_chars = "#!_-$@"
 @click.command()
 @click.option("--length", "-l", required=True, prompt="Délka hesla (6-20)", type=click.IntRange(6, 20),
               help="délka hesla v rozmezí 6-20 znaků")
-@click.option("--numbers", "-n", is_flag=True, prompt="Použít v hesle čísla?", help="použít i čísla")
-@click.option("--special", "-s", is_flag=True, prompt=f"Použít speciální znaky ({spe_chars})?",
+@click.option("--numbers/--no-numbers", "-n", is_flag=True, prompt="Použít v hesle čísla?", help="použít i čísla")
+@click.option("--special/--no-special", "-s", is_flag=True, prompt=f"Použít speciální znaky ({spe_chars})?",
               help=f"použít speciální znaky ({spe_chars})")
-@click.option("--lower_upper", "-i", is_flag=True, prompt="Použít i velka písmena?",
+@click.option("--lower-upper/--no-lower-upper", "-i", is_flag=True, prompt="Použít i velka písmena?",
               help="použít malá i velká písmena")
+@click.option("--copy/--no-copy", is_flag=True, default=True,
+              show_default=True, help="zkopírovat do schránky (vypnout pro neinteraktivní terminály)")
 @click.help_option("-h", "--help")
-def main(length: int, numbers: bool, special: bool, lower_upper: bool):
+def main(length: int, numbers: bool = False, special: bool = False, lower_upper: bool = False, copy: bool = True):
     """
     Program k vygenerování jednoduchého (ne)bezpečného hesla
     """
@@ -44,7 +46,7 @@ def main(length: int, numbers: bool, special: bool, lower_upper: bool):
         result += random.choice(index)
 
     print(result)
-    if click.confirm(click.style("Zkopírovat výsledek do clipboard?", fg="bright_green", bold=True), default=True):
+    if copy:
         import pyperclip
         pyperclip.copy(result)
         print("Zkopírováno!")
